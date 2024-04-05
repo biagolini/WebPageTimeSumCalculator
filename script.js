@@ -9,12 +9,14 @@ function addRow() {
     const newCell = newRow.insertCell(i)
     if (i < 3) {
       const input = document.createElement('input')
-      input.type = 'text' // Keep as text to manually handle numeric validation
-      input.pattern = '\\d*' // Ensures on mobile keyboards, numeric keyboard is shown
+      input.type = 'number'
+      input.min = 0
       input.value = 0
-      input.setAttribute('data-type', i < 1 ? 'hour' : 'minsec') // Custom attribute to distinguish between hour and minute/second inputs
-      input.addEventListener('input', enforceNumericInput)
-      input.addEventListener('change', updateSum)
+      input.max = i === 0 ? '23' : '59'
+      input.addEventListener('change', () => {
+        validateInput(input, i)
+        updateSum()
+      })
       newCell.appendChild(input)
     } else {
       newCell.textContent = '0:0:0'
@@ -22,31 +24,28 @@ function addRow() {
   }
 }
 
-function enforceNumericInput(event) {
-  let value = event.target.value.replace(/[^0-9]/g, '')
-  value = parseInt(value, 10)
-
-  if (isNaN(value)) {
-    value = 0 // Default to 0 if the result is NaN (not a number)
-  } else if (
-    event.target.getAttribute('data-type') === 'minsec' &&
-    value > 59
-  ) {
-    value = 59 // Cap minute and second values at 59
-  } else if (value < 0) {
-    value = 0 // Prevent negative numbers
+function validateInput(input, index) {
+  if (index > 0) {
+    const value = parseInt(input.value, 10)
+    if (value > 59) {
+      input.value = '59'
+    }
   }
-
-  event.target.value = value
 }
 
 function updateSum() {
   const rows = document.getElementById('timeTable').rows
   for (let i = 1; i < rows.length; i++) {
-    // Skip header row
-    const hour = rows[i].cells[0].children[0].value
-    const minute = rows[i].cells[1].children[0].value
-    const second = rows[i].cells[2].children[0].value
+    const hourInput = rows[i].cells[0].children[0]
+    const minuteInput = rows[i].cells[1].children[0]
+    const secondInput = rows[i].cells[2].children[0]
+    validateInput(hourInput, 0)
+    validateInput(minuteInput, 1)
+    validateInput(secondInput, 2)
+
+    const hour = hourInput.value
+    const minute = minuteInput.value
+    const second = secondInput.value
     const sumCell = rows[i].cells[3]
     if (i > 1) {
       const prevSum = rows[i - 1].cells[3].textContent.split(':')
@@ -67,6 +66,6 @@ function updateSum() {
   }
 }
 
-// Initialize the table with one row
+// Initialize the table with two rows
 addRow()
 addRow()
