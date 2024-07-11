@@ -2,6 +2,8 @@
 
 This project consists of a simple web application designed to calculate the sum of times (hours, minutes, and seconds) entered by the user. It features a dynamic table where users can add times, and it automatically calculates the cumulative sum for each entry. This application serves as a practical tool for learning and testing various cloud services (like AWS EC2, AWS s3 for host static webpages, pipelines, etc.), as well as for educational purposes in web development and cloud computing.
 
+Check this project at GitHub Pages: https://biagolini.github.io/WebPageTimeSumCalculator/
+
 ## Getting Started
 
 To utilize this application for learning or testing purposes, follow these steps:
