@@ -66,3 +66,21 @@ input {
   border-radius: 5px;
   width: calc(100% - 12px);
 }
+
+.summary-container {
+  text-align: left;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #e3f2fd;
+  border: 1px solid #90a4ae;
+  width: 100%;
+  border-radius: 5px;
+}
+
+.summary-container h3 {
+  margin: 0;
+}
+
+.summary-container p {
+  margin: 5px 0;
+}

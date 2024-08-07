@@ -12,6 +12,7 @@
         <table id="timeTable">
           <thead>
             <tr>
+              <th>Distance (km)</th>
               <th>Hour</th>
               <th>Minute</th>
               <th>Second</th>
@@ -25,6 +26,12 @@
       </div>
       <div class="button-container">
         <button id="addRowBtn">Add Row</button>
+      </div>
+      <div id="summary" class="summary-container">
+        <h3>Activity Summary</h3>
+        <p>Total Distance: <span id="totalDistance">0</span> km</p>
+        <p>Total Time: <span id="totalTime">0:0:0</span></p>
+        <p>Average Pace: <span id="averagePace">0:0:0</span> per km</p>
       </div>
     </div>
 
