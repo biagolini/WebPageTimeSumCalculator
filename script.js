@@ -1,170 +1,159 @@
-document.getElementById('addRowBtn').addEventListener('click', () => addRow())
-document.getElementById('clearAllBtn').addEventListener('click', clearAll)
+document.getElementById('addRowBtn').addEventListener('click', addEntry);
+document.getElementById('clearAllBtn').addEventListener('click', clearAll);
 
-// Load previous entries from localStorage on page load
 window.onload = function () {
-  loadPreviousEntries()
+  loadPreviousEntries();
+};
+
+let entryCounter = 0;
+
+function addEntry(distance = 0, hour = 0, minute = 0, second = 0) {
+  entryCounter++;
+  const container = document.getElementById('entriesContainer');
+  
+  const entryCard = document.createElement('div');
+  entryCard.className = 'entry-card';
+  entryCard.dataset.entryId = entryCounter;
+  
+  entryCard.innerHTML = `
+    <div class="entry-header">
+      <span class="entry-number">Entry ${entryCounter}</span>
+      <button class="delete-btn" onclick="deleteEntry(${entryCounter})">×</button>
+    </div>
+    
+    <div class="input-group">
+      <div class="input-field">
+        <label>Distance</label>
+        <input type="number" step="0.1" min="0" value="${distance}" data-field="distance">
+      </div>
+      <div class="input-field">
+        <label>Hours</label>
+        <input type="number" min="0" max="23" value="${hour}" data-field="hour">
+      </div>
+      <div class="input-field">
+        <label>Minutes</label>
+        <input type="number" min="0" max="59" value="${minute}" data-field="minute">
+      </div>
+      <div class="input-field">
+        <label>Seconds</label>
+        <input type="number" min="0" max="59" value="${second}" data-field="second">
+      </div>
+    </div>
+    
+    <div class="sum-display">
+      Cumulative: <span class="sum-time">00:00:00</span>
+    </div>
+  `;
+  
+  container.appendChild(entryCard);
+  
+  // Add event listeners to inputs
+  const inputs = entryCard.querySelectorAll('input');
+  inputs.forEach(input => {
+    input.addEventListener('input', () => {
+      validateInput(input);
+      updateSums();
+      saveEntries();
+    });
+  });
+  
+  updateSums();
 }
 
-function addRow(distance = 0, hour = 0, minute = 0, second = 0) {
-  const table = document
-    .getElementById('timeTable')
-    .getElementsByTagName('tbody')[0]
-  const newRow = table.insertRow()
-  for (let i = 0; i < 6; i++) {
-    const newCell = newRow.insertCell(i)
-    if (i < 4) {
-      const input = document.createElement('input')
-      input.type = 'number'
-      input.min = 0
-      input.value = [distance, hour, minute, second][i]
-      input.className = 'form-control'
-      if (i === 1) input.max = '23'
-      else if (i > 1) input.max = '59'
-
-      input.addEventListener('change', () => {
-        validateInput(input, i)
-        updateSum()
-      })
-      newCell.appendChild(input)
-    } else if (i === 4) {
-      newCell.textContent = '00:00:00'
-    } else {
-      // Add delete button in the last cell
-      const deleteButton = document.createElement('button')
-      deleteButton.textContent = 'Delete'
-      deleteButton.className = 'btn btn-danger btn-sm'
-      deleteButton.addEventListener('click', () => {
-        table.deleteRow(newRow.rowIndex - 1) // Adjust for header row
-        updateSum()
-        saveEntries() // Save changes after row deletion
-      })
-      newCell.appendChild(deleteButton)
-    }
+function deleteEntry(entryId) {
+  const entryCard = document.querySelector(`[data-entry-id="${entryId}"]`);
+  if (entryCard) {
+    entryCard.remove();
+    updateSums();
+    saveEntries();
   }
-  updateSum()
 }
 
-function validateInput(input, index) {
-  const value = parseInt(input.value, 10)
-  if (index > 0 && index < 4) {
-    if ((index === 1 && value > 23) || value > 59) {
-      input.value = index === 1 ? '23' : '59'
-    }
+function validateInput(input) {
+  const field = input.dataset.field;
+  let value = parseInt(input.value) || 0;
+  
+  if (field === 'hour' && value > 23) {
+    input.value = 23;
+  } else if ((field === 'minute' || field === 'second') && value > 59) {
+    input.value = 59;
+  } else if (value < 0) {
+    input.value = 0;
   }
-  saveEntries() // Save every change to localStorage
 }
 
-function updateSum() {
-  const rows = document.getElementById('timeTable').rows
-  let totalDistance = 0
-  let totalSeconds = 0
-
-  for (let i = 1; i < rows.length; i++) {
-    const distanceInput = rows[i].cells[0].children[0]
-    const hourInput = rows[i].cells[1].children[0]
-    const minuteInput = rows[i].cells[2].children[0]
-    const secondInput = rows[i].cells[3].children[0]
-
-    validateInput(distanceInput, 0)
-    validateInput(hourInput, 1)
-    validateInput(minuteInput, 2)
-    validateInput(secondInput, 3)
-
-    const distance = parseFloat(distanceInput.value)
-    const hour = parseInt(hourInput.value)
-    const minute = parseInt(minuteInput.value)
-    const second = parseInt(secondInput.value)
-
-    totalDistance += distance
-    totalSeconds += hour * 3600 + minute * 60 + second
-
-    const sumCell = rows[i].cells[4]
-    if (i > 1) {
-      const prevSum = rows[i - 1].cells[4].textContent.split(':')
-      const cumulativeSeconds =
-        parseInt(prevSum[0]) * 3600 +
-        parseInt(prevSum[1]) * 60 +
-        parseInt(prevSum[2]) +
-        hour * 3600 +
-        minute * 60 +
-        second
-      const sumHours = Math.floor(cumulativeSeconds / 3600)
-      const sumMinutes = Math.floor((cumulativeSeconds % 3600) / 60)
-      const sumSeconds = cumulativeSeconds % 60
-      sumCell.textContent = formatTime(sumHours, sumMinutes, sumSeconds)
-    } else {
-      sumCell.textContent = formatTime(hour, minute, second)
-    }
-  }
-
-  updateSummary(totalDistance, totalSeconds)
+function updateSums() {
+  const entries = document.querySelectorAll('.entry-card');
+  let totalDistance = 0;
+  let cumulativeSeconds = 0;
+  let totalSeconds = 0;
+  
+  entries.forEach((entry, index) => {
+    const inputs = entry.querySelectorAll('input');
+    const distance = parseFloat(inputs[0].value) || 0;
+    const hour = parseInt(inputs[1].value) || 0;
+    const minute = parseInt(inputs[2].value) || 0;
+    const second = parseInt(inputs[3].value) || 0;
+    
+    const entrySeconds = hour * 3600 + minute * 60 + second;
+    cumulativeSeconds += entrySeconds;
+    totalDistance += distance;
+    totalSeconds += entrySeconds;
+    
+    const sumDisplay = entry.querySelector('.sum-time');
+    sumDisplay.textContent = formatTime(cumulativeSeconds);
+  });
+  
+  updateSummary(totalDistance, totalSeconds);
 }
 
 function updateSummary(totalDistance, totalSeconds) {
-  const totalHours = Math.floor(totalSeconds / 3600)
-  const totalMinutes = Math.floor((totalSeconds % 3600) / 60)
-  const totalSec = totalSeconds % 60
-
-  const averagePaceSeconds = totalSeconds / totalDistance
-  const paceMinutes = Math.floor(averagePaceSeconds / 60)
-  const paceSeconds = Math.round(averagePaceSeconds % 60)
-
-  document.getElementById('totalDistance').textContent =
-    totalDistance.toFixed(2)
-  document.getElementById('totalTime').textContent = formatTime(
-    totalHours,
-    totalMinutes,
-    totalSec
-  )
-  document.getElementById('averagePace').textContent = `${formatNumber(
-    paceMinutes
-  )}:${formatNumber(paceSeconds)}`
+  const averagePaceSeconds = totalDistance > 0 ? totalSeconds / totalDistance : 0;
+  const paceMinutes = Math.floor(averagePaceSeconds / 60);
+  const paceSeconds = Math.round(averagePaceSeconds % 60);
+  
+  document.getElementById('totalDistance').textContent = totalDistance.toFixed(1);
+  document.getElementById('totalTime').textContent = formatTime(totalSeconds);
+  document.getElementById('averagePace').textContent = 
+    totalDistance > 0 ? `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}` : '0:00';
 }
 
-function formatTime(hours, minutes, seconds) {
-  return `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(
-    seconds
-  )}`
-}
-
-function formatNumber(num) {
-  return num < 10 ? `0${num}` : num
+function formatTime(totalSeconds) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 function saveEntries() {
-  const rows = document.getElementById('timeTable').rows
-  const entries = []
-  for (let i = 1; i < rows.length; i++) {
-    const distance = rows[i].cells[0].children[0].value
-    const hour = rows[i].cells[1].children[0].value
-    const minute = rows[i].cells[2].children[0].value
-    const second = rows[i].cells[3].children[0].value
-    entries.push({ distance, hour, minute, second })
-  }
-  localStorage.setItem('entries', JSON.stringify(entries))
+  const entries = [];
+  document.querySelectorAll('.entry-card').forEach(entry => {
+    const inputs = entry.querySelectorAll('input');
+    entries.push({
+      distance: inputs[0].value,
+      hour: inputs[1].value,
+      minute: inputs[2].value,
+      second: inputs[3].value
+    });
+  });
+  localStorage.setItem('entries', JSON.stringify(entries));
 }
 
 function loadPreviousEntries() {
-  const entries = JSON.parse(localStorage.getItem('entries'))
-  if (entries) {
+  const entries = JSON.parse(localStorage.getItem('entries'));
+  if (entries && entries.length > 0) {
     entries.forEach(entry => {
-      addRow(entry.distance, entry.hour, entry.minute, entry.second)
-    })
+      addEntry(entry.distance, entry.hour, entry.minute, entry.second);
+    });
   } else {
-    // Initialize the table with two rows if no previous entries
-    addRow()
-    addRow()
+    addEntry();
   }
 }
 
 function clearAll() {
-  const tableBody = document
-    .getElementById('timeTable')
-    .getElementsByTagName('tbody')[0]
-  tableBody.innerHTML = '' // Clear all rows
-  addRow()
-  addRow()
-  localStorage.removeItem('entries') // Clear entries from localStorage
-  updateSum()
+  document.getElementById('entriesContainer').innerHTML = '';
+  entryCounter = 0;
+  localStorage.removeItem('entries');
+  addEntry();
 }

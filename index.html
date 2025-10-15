@@ -2,57 +2,50 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>Time Sum Calculator</title>
-    <!-- Include Bootstrap CSS -->
-    <link
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="logo/logo.png">
+    <link rel="icon" type="image/png" href="logo/logo.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Time Calculator">
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="container mt-5">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-          <h2 class="mb-0">Time Sum Calculator</h2>
+    <div class="container">
+      <header>
+        <h1>Time Sum Calculator</h1>
+      </header>
+      
+      <main>
+        <div class="entries-container" id="entriesContainer">
+          <!-- Entries will be added here -->
         </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-bordered" id="timeTable">
-              <thead class="thead-light">
-                <tr>
-                  <th>Distance (km)</th>
-                  <th>Hour</th>
-                  <th>Minute</th>
-                  <th>Second</th>
-                  <th>Sum</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <!-- Rows will be added here -->
-              </tbody>
-            </table>
+        
+        <div class="controls">
+          <button id="addRowBtn" class="btn btn-primary">+ Add Entry</button>
+          <button id="clearAllBtn" class="btn btn-secondary">Clear All</button>
+        </div>
+        
+        <div class="summary">
+          <h2>Summary</h2>
+          <div class="summary-item">
+            <span class="label">Total Distance:</span>
+            <span id="totalDistance">0</span> km
           </div>
-          <div class="d-flex justify-content-end mb-3">
-            <button id="addRowBtn" class="btn btn-success mr-2">Add Row</button>
-            <button id="clearAllBtn" class="btn btn-danger">Clear All</button>
+          <div class="summary-item">
+            <span class="label">Total Time:</span>
+            <span id="totalTime">0:00:00</span>
           </div>
-          <div id="summary" class="summary-container">
-            <h3>Activity Summary</h3>
-            <p>Total Distance: <span id="totalDistance">0</span> km</p>
-            <p>Total Time: <span id="totalTime">0:0:0</span></p>
-            <p>Average Pace: <span id="averagePace">0:0:0</span>/km</p>
+          <div class="summary-item">
+            <span class="label">Average Pace:</span>
+            <span id="averagePace">0:00</span>/km
           </div>
         </div>
-      </div>
+      </main>
     </div>
-
-    <!-- Include Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
     <script src="script.js"></script>
   </body>
 </html>
