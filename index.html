@@ -24,7 +24,8 @@
         </div>
         
         <div class="controls">
-          <button id="addRowBtn" class="btn btn-primary">+ Add Entry</button>
+          <button id="addRowBtn" class="btn btn-primary">+ Add Run</button>
+          <button id="addActivityBtn" class="btn btn-activity">+ Add Activity</button>
           <button id="clearAllBtn" class="btn btn-secondary">Clear All</button>
         </div>
         
@@ -42,6 +43,12 @@
             <span class="label">Average Pace:</span>
             <span id="averagePace">0:00</span>/km
           </div>
+        </div>
+
+        <div class="copy-summary">
+          <h2>Copy Summary</h2>
+          <textarea id="summaryText" class="summary-text" readonly rows="6"></textarea>
+          <button id="copySummaryBtn" class="btn btn-primary">Copy to Clipboard</button>
         </div>
       </main>
     </div>
