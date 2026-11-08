@@ -2,12 +2,68 @@ document.getElementById('addRowBtn').addEventListener('click', () => addEntry())
 document.getElementById('addActivityBtn').addEventListener('click', () => addActivity());
 document.getElementById('clearAllBtn').addEventListener('click', clearAll);
 document.getElementById('copySummaryBtn').addEventListener('click', copySummary);
+document.getElementById('langPt').addEventListener('click', () => setLanguage('pt'));
+document.getElementById('langEn').addEventListener('click', () => setLanguage('en'));
 
 window.onload = function () {
+  currentLang = localStorage.getItem('lang') || 'en';
+  applyLanguage();
   loadPreviousEntries();
 };
 
 let entryCounter = 0;
+let currentLang = 'en';
+
+// Looks up a translation key for the current language, falling back to English then the key itself.
+function t(key) {
+  const lang = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+  return lang[key] || TRANSLATIONS.en[key] || key;
+}
+
+// Switches language, persists the choice, and re-renders every translatable element and card.
+function setLanguage(lang) {
+  if (!TRANSLATIONS[lang]) return;
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  applyLanguage();
+}
+
+// Applies the current language to static elements, card labels, and the summary.
+function applyLanguage() {
+  document.documentElement.lang = currentLang;
+
+  // Static elements tagged with data-i18n (text content).
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+
+  // Active state on the language buttons.
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === currentLang);
+  });
+
+  // Re-label every existing card (type title, field labels, placeholders).
+  document.querySelectorAll('.entry-card').forEach(relabelCard);
+
+  updateSums();
+}
+
+// Updates the translatable labels inside a single card without touching its values.
+function relabelCard(card) {
+  const type = card.dataset.type;
+  const numberEl = card.querySelector('.entry-number');
+  if (numberEl) {
+    const label = type === 'activity' ? t('card.activity') : t('card.run');
+    numberEl.textContent = `${label} ${numberEl.dataset.index}`;
+  }
+
+  card.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  card.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+}
 
 // Attaches input listeners that validate, recalculate and persist on every change.
 function attachListeners(card) {
@@ -23,8 +79,19 @@ function attachListeners(card) {
   });
 }
 
-// Creates a run card (distance + time).
-function addEntry(distance = 0, hour = 0, minute = 0, second = 0) {
+// Shared comment field markup used by both run and activity cards.
+function commentFieldHtml(comment) {
+  return `
+    <div class="input-field input-field-text">
+      <label data-i18n="field.comment">Comment (optional)</label>
+      <textarea data-field="comment" rows="1" data-i18n-placeholder="placeholder.comment"
+        placeholder="e.g. on an incline">${escapeHtml(comment)}</textarea>
+    </div>
+  `;
+}
+
+// Creates a run card (distance + time + optional comment).
+function addEntry(distance = 0, hour = 0, minute = 0, second = 0, comment = '') {
   entryCounter++;
   const container = document.getElementById('entriesContainer');
 
@@ -35,31 +102,33 @@ function addEntry(distance = 0, hour = 0, minute = 0, second = 0) {
 
   entryCard.innerHTML = `
     <div class="entry-header">
-      <span class="entry-number">Run ${entryCounter}</span>
+      <span class="entry-number" data-index="${entryCounter}">${t('card.run')} ${entryCounter}</span>
       <button class="delete-btn" onclick="deleteEntry(${entryCounter})">×</button>
     </div>
 
     <div class="input-group">
       <div class="input-field">
-        <label>Distance</label>
+        <label data-i18n="field.distance">Distance</label>
         <input type="number" step="0.1" min="0" value="${distance}" data-field="distance">
       </div>
       <div class="input-field">
-        <label>Hours</label>
+        <label data-i18n="field.hours">Hours</label>
         <input type="number" min="0" max="23" value="${hour}" data-field="hour">
       </div>
       <div class="input-field">
-        <label>Minutes</label>
+        <label data-i18n="field.minutes">Minutes</label>
         <input type="number" min="0" max="59" value="${minute}" data-field="minute">
       </div>
       <div class="input-field">
-        <label>Seconds</label>
+        <label data-i18n="field.seconds">Seconds</label>
         <input type="number" min="0" max="59" value="${second}" data-field="second">
       </div>
     </div>
 
+    ${commentFieldHtml(comment)}
+
     <div class="sum-display">
-      Cumulative: <span class="sum-time">00:00:00</span>
+      <span data-i18n="card.cumulative">${t('card.cumulative')}</span> <span class="sum-time">00:00:00</span>
     </div>
   `;
 
@@ -68,8 +137,8 @@ function addEntry(distance = 0, hour = 0, minute = 0, second = 0) {
   updateSums();
 }
 
-// Creates an activity card (time + free text, e.g. strength training).
-function addActivity(hour = 0, minute = 0, second = 0, text = '') {
+// Creates an activity card (time + free text + optional comment, e.g. strength training).
+function addActivity(hour = 0, minute = 0, second = 0, text = '', comment = '') {
   entryCounter++;
   const container = document.getElementById('entriesContainer');
 
@@ -80,32 +149,35 @@ function addActivity(hour = 0, minute = 0, second = 0, text = '') {
 
   activityCard.innerHTML = `
     <div class="entry-header">
-      <span class="entry-number">Activity ${entryCounter}</span>
+      <span class="entry-number" data-index="${entryCounter}">${t('card.activity')} ${entryCounter}</span>
       <button class="delete-btn" onclick="deleteEntry(${entryCounter})">×</button>
     </div>
 
     <div class="input-group input-group-activity">
       <div class="input-field">
-        <label>Hours</label>
+        <label data-i18n="field.hours">Hours</label>
         <input type="number" min="0" max="23" value="${hour}" data-field="hour">
       </div>
       <div class="input-field">
-        <label>Minutes</label>
+        <label data-i18n="field.minutes">Minutes</label>
         <input type="number" min="0" max="59" value="${minute}" data-field="minute">
       </div>
       <div class="input-field">
-        <label>Seconds</label>
+        <label data-i18n="field.seconds">Seconds</label>
         <input type="number" min="0" max="59" value="${second}" data-field="second">
       </div>
     </div>
 
     <div class="input-field input-field-text">
-      <label>Activity</label>
-      <textarea data-field="text" rows="1" placeholder="e.g. leg training">${text}</textarea>
+      <label data-i18n="field.activity">Activity</label>
+      <textarea data-field="text" rows="1" data-i18n-placeholder="placeholder.activity"
+        placeholder="e.g. leg training">${escapeHtml(text)}</textarea>
     </div>
 
+    ${commentFieldHtml(comment)}
+
     <div class="sum-display">
-      Cumulative: <span class="sum-time">00:00:00</span>
+      <span data-i18n="card.cumulative">${t('card.cumulative')}</span> <span class="sum-time">00:00:00</span>
     </div>
   `;
 
@@ -184,7 +256,7 @@ function updateSummary(totalDistance, totalSeconds) {
     totalDistance > 0 ? `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}` : '0:00';
 }
 
-// Builds the copyable summary, one line per card in display order.
+// Builds the copyable summary, one line per card in display order and in the current language.
 function updateCopySummary() {
   const entries = document.querySelectorAll('.entry-card');
   const lines = [];
@@ -193,14 +265,18 @@ function updateCopySummary() {
     const { hour, minute, second } = getTimeInputs(entry);
     const entrySeconds = hour * 3600 + minute * 60 + second;
     const timeStr = formatSummaryTime(entrySeconds);
+    const comment = entry.querySelector('[data-field="comment"]').value.trim();
+    const suffix = comment ? ` - ${comment}` : '';
 
+    let line;
     if (entry.dataset.type === 'run') {
       const distance = parseFloat(entry.querySelector('[data-field="distance"]').value) || 0;
-      lines.push(`${formatDistance(distance)} km em ${timeStr}`);
+      line = `${formatDistance(distance)} km ${t('summaryText.in')} ${timeStr}`;
     } else {
       const text = entry.querySelector('[data-field="text"]').value.trim();
-      lines.push(`${timeStr} de ${text || 'activity'}`);
+      line = `${timeStr} ${t('summaryText.of')} ${text || t('summaryText.activityFallback')}`;
     }
+    lines.push(line + suffix);
   });
 
   document.getElementById('summaryText').value = lines.join('\n');
@@ -231,6 +307,15 @@ function formatTime(totalSeconds) {
   return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
+// Escapes user text so it is safe to drop into the card's innerHTML on load.
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function copySummary() {
   const summaryText = document.getElementById('summaryText');
   const text = summaryText.value;
@@ -238,9 +323,8 @@ function copySummary() {
 
   const btn = document.getElementById('copySummaryBtn');
   const done = () => {
-    const original = btn.textContent;
-    btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = original; }, 1500);
+    btn.textContent = t('copy.copied');
+    setTimeout(() => { btn.textContent = t('copy.button'); }, 1500);
   };
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -263,12 +347,13 @@ function saveEntries() {
   const entries = [];
   document.querySelectorAll('.entry-card').forEach(entry => {
     const { hour, minute, second } = getTimeInputs(entry);
+    const comment = entry.querySelector('[data-field="comment"]').value;
     if (entry.dataset.type === 'run') {
       const distance = entry.querySelector('[data-field="distance"]').value;
-      entries.push({ type: 'run', distance, hour, minute, second });
+      entries.push({ type: 'run', distance, hour, minute, second, comment });
     } else {
       const text = entry.querySelector('[data-field="text"]').value;
-      entries.push({ type: 'activity', hour, minute, second, text });
+      entries.push({ type: 'activity', hour, minute, second, text, comment });
     }
   });
   localStorage.setItem('entries', JSON.stringify(entries));
@@ -279,9 +364,9 @@ function loadPreviousEntries() {
   if (entries && entries.length > 0) {
     entries.forEach(entry => {
       if (entry.type === 'activity') {
-        addActivity(entry.hour, entry.minute, entry.second, entry.text);
+        addActivity(entry.hour, entry.minute, entry.second, entry.text, entry.comment || '');
       } else {
-        addEntry(entry.distance, entry.hour, entry.minute, entry.second);
+        addEntry(entry.distance, entry.hour, entry.minute, entry.second, entry.comment || '');
       }
     });
   } else {

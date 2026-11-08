@@ -1,0 +1,60 @@
+// Translation tables for the interface. One flat key/value map per language.
+// English is the reference key list; keep both languages with the same keys.
+const TRANSLATIONS = {
+  en: {
+    'app.title': 'Time Sum Calculator',
+    'controls.addRun': '+ Add Run',
+    'controls.addActivity': '+ Add Activity',
+    'controls.clearAll': 'Clear All',
+    'summary.heading': 'Summary',
+    'summary.totalDistance': 'Total Distance:',
+    'summary.totalTime': 'Total Time:',
+    'summary.averagePace': 'Average Pace:',
+    'copy.heading': 'Copy Summary',
+    'copy.button': 'Copy to Clipboard',
+    'copy.copied': 'Copied!',
+    'card.run': 'Run',
+    'card.activity': 'Activity',
+    'card.cumulative': 'Cumulative:',
+    'field.distance': 'Distance',
+    'field.hours': 'Hours',
+    'field.minutes': 'Minutes',
+    'field.seconds': 'Seconds',
+    'field.activity': 'Activity',
+    'field.comment': 'Comment (optional)',
+    'placeholder.activity': 'e.g. leg training',
+    'placeholder.comment': 'e.g. on an incline',
+    // Words used to build the copyable summary.
+    'summaryText.in': 'in',
+    'summaryText.of': 'of',
+    'summaryText.activityFallback': 'activity'
+  },
+  pt: {
+    'app.title': 'Calculadora de Tempos',
+    'controls.addRun': '+ Adicionar Corrida',
+    'controls.addActivity': '+ Adicionar Atividade',
+    'controls.clearAll': 'Limpar Tudo',
+    'summary.heading': 'Resumo',
+    'summary.totalDistance': 'Distância Total:',
+    'summary.totalTime': 'Tempo Total:',
+    'summary.averagePace': 'Ritmo Médio:',
+    'copy.heading': 'Copiar Resumo',
+    'copy.button': 'Copiar para Área de Transferência',
+    'copy.copied': 'Copiado!',
+    'card.run': 'Corrida',
+    'card.activity': 'Atividade',
+    'card.cumulative': 'Acumulado:',
+    'field.distance': 'Distância',
+    'field.hours': 'Horas',
+    'field.minutes': 'Minutos',
+    'field.seconds': 'Segundos',
+    'field.activity': 'Atividade',
+    'field.comment': 'Comentário (opcional)',
+    'placeholder.activity': 'ex: treino de perna',
+    'placeholder.comment': 'ex: com inclinação',
+    // Words used to build the copyable summary.
+    'summaryText.in': 'em',
+    'summaryText.of': 'de',
+    'summaryText.activityFallback': 'atividade'
+  }
+};

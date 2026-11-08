@@ -15,7 +15,11 @@
   <body>
     <div class="container">
       <header>
-        <h1>Time Sum Calculator</h1>
+        <div class="lang-switch">
+          <button id="langPt" class="lang-btn" data-lang="pt">PT</button>
+          <button id="langEn" class="lang-btn" data-lang="en">EN</button>
+        </div>
+        <h1 data-i18n="app.title">Time Sum Calculator</h1>
       </header>
       
       <main>
@@ -24,35 +28,36 @@
         </div>
         
         <div class="controls">
-          <button id="addRowBtn" class="btn btn-primary">+ Add Run</button>
-          <button id="addActivityBtn" class="btn btn-activity">+ Add Activity</button>
-          <button id="clearAllBtn" class="btn btn-secondary">Clear All</button>
+          <button id="addRowBtn" class="btn btn-primary" data-i18n="controls.addRun">+ Add Run</button>
+          <button id="addActivityBtn" class="btn btn-activity" data-i18n="controls.addActivity">+ Add Activity</button>
+          <button id="clearAllBtn" class="btn btn-secondary" data-i18n="controls.clearAll">Clear All</button>
         </div>
         
         <div class="summary">
-          <h2>Summary</h2>
+          <h2 data-i18n="summary.heading">Summary</h2>
           <div class="summary-item">
-            <span class="label">Total Distance:</span>
+            <span class="label" data-i18n="summary.totalDistance">Total Distance:</span>
             <span id="totalDistance">0</span> km
           </div>
           <div class="summary-item">
-            <span class="label">Total Time:</span>
+            <span class="label" data-i18n="summary.totalTime">Total Time:</span>
             <span id="totalTime">0:00:00</span>
           </div>
           <div class="summary-item">
-            <span class="label">Average Pace:</span>
+            <span class="label" data-i18n="summary.averagePace">Average Pace:</span>
             <span id="averagePace">0:00</span>/km
           </div>
         </div>
 
         <div class="copy-summary">
-          <h2>Copy Summary</h2>
+          <h2 data-i18n="copy.heading">Copy Summary</h2>
           <textarea id="summaryText" class="summary-text" readonly rows="6"></textarea>
-          <button id="copySummaryBtn" class="btn btn-primary">Copy to Clipboard</button>
+          <button id="copySummaryBtn" class="btn btn-primary" data-i18n="copy.button">Copy to Clipboard</button>
         </div>
       </main>
     </div>
     
+    <script src="i18n.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
