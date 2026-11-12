@@ -18,6 +18,8 @@
         <div class="lang-switch">
           <button id="langPt" class="lang-btn" data-lang="pt">PT</button>
           <button id="langEn" class="lang-btn" data-lang="en">EN</button>
+          <button id="langEs" class="lang-btn" data-lang="es">ES</button>
+          <button id="langIt" class="lang-btn" data-lang="it">IT</button>
         </div>
         <h1 data-i18n="app.title">Time Sum Calculator</h1>
       </header>
@@ -40,12 +42,16 @@
             <span id="totalDistance">0</span> km
           </div>
           <div class="summary-item">
-            <span class="label" data-i18n="summary.totalTime">Total Time:</span>
-            <span id="totalTime">0:00:00</span>
+            <span class="label" data-i18n="summary.runTime">Run Time:</span>
+            <span id="runTime">0:00:00</span>
           </div>
           <div class="summary-item">
             <span class="label" data-i18n="summary.averagePace">Average Pace:</span>
-            <span id="averagePace">0:00</span>/km
+            <span id="averagePace">0:00</span> min/km
+          </div>
+          <div class="summary-item">
+            <span class="label" data-i18n="summary.totalTime">Total Time (with activities):</span>
+            <span id="totalTime">0:00:00</span>
           </div>
         </div>
 

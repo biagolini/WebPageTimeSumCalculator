@@ -4,6 +4,8 @@ document.getElementById('clearAllBtn').addEventListener('click', clearAll);
 document.getElementById('copySummaryBtn').addEventListener('click', copySummary);
 document.getElementById('langPt').addEventListener('click', () => setLanguage('pt'));
 document.getElementById('langEn').addEventListener('click', () => setLanguage('en'));
+document.getElementById('langEs').addEventListener('click', () => setLanguage('es'));
+document.getElementById('langIt').addEventListener('click', () => setLanguage('it'));
 
 window.onload = function () {
   currentLang = localStorage.getItem('lang') || 'en';
@@ -222,6 +224,7 @@ function updateSums() {
   let totalDistance = 0;
   let cumulativeSeconds = 0;
   let totalSeconds = 0;
+  let runSeconds = 0;
 
   entries.forEach(entry => {
     const { hour, minute, second } = getTimeInputs(entry);
@@ -231,26 +234,29 @@ function updateSums() {
     cumulativeSeconds += entrySeconds;
     totalSeconds += entrySeconds;
 
-    // Only runs contribute distance (and therefore pace).
+    // Only runs contribute distance and run time (and therefore pace).
     if (entry.dataset.type === 'run') {
       const distance = parseFloat(entry.querySelector('[data-field="distance"]').value) || 0;
       totalDistance += distance;
+      runSeconds += entrySeconds;
     }
 
     const sumDisplay = entry.querySelector('.sum-time');
     sumDisplay.textContent = formatTime(cumulativeSeconds);
   });
 
-  updateSummary(totalDistance, totalSeconds);
+  updateSummary(totalDistance, runSeconds, totalSeconds);
   updateCopySummary();
 }
 
-function updateSummary(totalDistance, totalSeconds) {
-  const averagePaceSeconds = totalDistance > 0 ? totalSeconds / totalDistance : 0;
+// Run time and pace ignore activity cards; total time includes them.
+function updateSummary(totalDistance, runSeconds, totalSeconds) {
+  const averagePaceSeconds = totalDistance > 0 ? runSeconds / totalDistance : 0;
   const paceMinutes = Math.floor(averagePaceSeconds / 60);
   const paceSeconds = Math.round(averagePaceSeconds % 60);
 
   document.getElementById('totalDistance').textContent = totalDistance.toFixed(1);
+  document.getElementById('runTime').textContent = formatTime(runSeconds);
   document.getElementById('totalTime').textContent = formatTime(totalSeconds);
   document.getElementById('averagePace').textContent =
     totalDistance > 0 ? `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}` : '0:00';
